@@ -2,43 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YouTube Downloader</title>
+    <title>YouTube Video Downloader</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
-        h1 { color: #ff0000; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        input[type="text"] { width: 100%; padding: 8px; }
-        select { width: 100%; padding: 8px; }
-        button { 
-            background: #ff0000; color: white; border: none; 
-            padding: 10px 15px; width: 100%; cursor: pointer; 
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 0 20px;
+            line-height: 1.6;
         }
-        .error { color: red; }
+        h1 {
+            text-align: center;
+            font-weight: normal;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+        }
+        .quality-option {
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        button {
+            background: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            width: 100%;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 40px;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>YouTube Downloader</h1>
+    <h1>YouTube Video Downloader</h1>
+    
     <form method="post">
-        <div class="form-group">
-            <input type="text" name="url" placeholder="YouTube URL" required>
+        <div class="section">
+            <div class="section-title">YouTube Video or Playlist URL:</div>
+            <input type="text" name="url" placeholder="Enter video or playlist URL" required>
         </div>
-        <div class="form-group">
-            <select name="quality">
-                <option value="720">720p HD</option>
-                <option value="1080">1080p Full HD</option>
-                <option value="480">480p</option>
-            </select>
-        </div>
-        <div class="form-group">
+        
+        <hr>
+        
+        <div class="section">
+            <div class="section-title">Video Quality (if not audio-only):</div>
+            <div class="quality-option">720p</div>
             <label>
-                <input type="checkbox" name="audio_only"> Download as MP3
+                <input type="checkbox" name="audio_only"> Audio Only (MP3)
             </label>
         </div>
+        
+        <hr>
+        
         <button type="submit">Download</button>
     </form>
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+    
+    <div class="footer">Created by Suhail Al Mehedi</div>
 </body>
 </html>

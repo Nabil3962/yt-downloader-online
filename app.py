@@ -6,17 +6,12 @@ import shutil
 
 app = Flask(__name__)
 
-# Global error handler
-@app.errorhandler(Exception)
-def handle_error(e):
-    return f"System Error: {str(e)}", 500
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         url = request.form.get("url")
-        if not url or "youtube.com" not in url and "youtu.be" not in url:
-            return "Invalid YouTube URL", 400
+        if not url:
+            return "Please enter a YouTube URL", 400
 
         temp_dir = tempfile.mkdtemp()
         try:
@@ -24,13 +19,10 @@ def index():
                 'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
-                'extract_flat': True,
+                'extract_flat': False,  # FIXES 'NoneType' ERROR
                 'force_ipv4': True,
-                'cookiefile': None,  # COMPLETELY DISABLES COOKIES
-                'ignoreerrors': True,
-                'nocheckcertificate': True,
-                'default_search': 'auto',
-                'source_address': '0.0.0.0',
+                'ignoreerrors': False,
+                'noplaylist': False,
             }
 
             if request.form.get("audio_only"):
@@ -43,22 +35,18 @@ def index():
                 })
             else:
                 ydl_opts.update({
-                    'format': f'bestvideo[height<={request.form.get("quality", "720")}]+bestaudio/best',
+                    'format': 'bestvideo[height<=720]+bestaudio/best',
                     'merge_output_format': 'mp4',
                 })
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=True)
-                filename = ydl.prepare_filename(info)
-                if request.form.get("audio_only"):
-                    filename = filename.replace('.webm', '.mp3').replace('.mp4', '.mp3')
+                info_dict = ydl.extract_info(url, download=True)
+                filename = ydl.prepare_filename(info_dict)
 
             return send_file(filename, as_attachment=True)
 
         except Exception as e:
-            shutil.rmtree(temp_dir, ignore_errors=True)
             return f"Download Error: {str(e)}", 500
-
         finally:
             shutil.rmtree(temp_dir, ignore_errors=True)
 

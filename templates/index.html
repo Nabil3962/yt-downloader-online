@@ -13,65 +13,38 @@
             color: #333;
             line-height: 1.5;
         }
-        
         h1 {
-            font-size: 1.5rem;
             color: #1a73e8;
-            font-weight: bold;
             text-align: center;
-            margin-bottom: 1.5rem;
         }
-        
-        .section-title {
-            color: #1a73e8;
-            font-weight: bold;
-            margin: 1.5rem 0 1rem 0;
-            font-size: 1.1rem;
+        .input-group {
+            margin-bottom: 20px;
         }
-        
-        .divider {
-            border: none;
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 1.5rem 0;
-        }
-        
         input[type="text"] {
             width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            font-family: inherit;
+            padding: 8px;
+            margin-top: 5px;
         }
-        
-        .quality-option {
-            margin: 0.75rem 0;
-            font-weight: normal;
-        }
-        
-        .checkbox {
-            margin: 1rem 0;
-        }
-        
-        button {
-            display: block;
+        select {
             width: 100%;
-            padding: 0.75rem;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        .checkbox {
+            margin: 15px 0;
+        }
+        button {
             background-color: #1a73e8;
             color: white;
             border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            margin: 1.5rem auto;
+            padding: 10px 20px;
+            width: 100%;
             cursor: pointer;
-            font-weight: bold;
         }
-        
         .footer {
             text-align: center;
+            margin-top: 30px;
             color: #666;
-            margin-top: 2rem;
         }
     </style>
 </head>
@@ -79,20 +52,20 @@
     <h1>YouTube Video Downloader</h1>
     
     <form method="post">
-        <div class="section-title">YouTube Video or Playlist URL:</div>
-        <input type="text" name="url" placeholder="Enter video or playlist URL" required>
+        <div class="input-group">
+            <label for="url">YouTube Video or Playlist URL:</label>
+            <input type="text" id="url" name="url" placeholder="Enter URL" required>
+        </div>
         
-        <hr class="divider">
-        
-        <div class="section-title">Video Quality (if not audio-only):</div>
-        <select name="quality" class="quality-option">
-            <option selected>720p</option>
-            <option>1080p</option>
-            <option>480p</option>
-            <option>360p</option>
-            <option>240p</option>
-            <option>144p</option>
-        </select>
+        <div class="input-group">
+            <label for="quality">Video Quality:</label>
+            <select id="quality" name="quality">
+                <option value="720">720p</option>
+                <option value="1080">1080p</option>
+                <option value="480">480p</option>
+                <option value="360">360p</option>
+            </select>
+        </div>
         
         <div class="checkbox">
             <input type="checkbox" id="audio_only" name="audio_only">

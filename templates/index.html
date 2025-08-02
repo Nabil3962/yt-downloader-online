@@ -1,25 +1,78 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>YouTube Downloader</title>
+    <meta charset="UTF-8" />
+    <title>YouTube Downloader - Suhail Al Mehedi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background-color: #f5f7fa;
+        }
+        h1 {
+            color: #0a84ff;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        .checkbox {
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #0a84ff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        .message {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>YouTube Downloader</h1>
-    <form method="post">
-        <label>Video URL:</label><br>
-        <input name="url" type="text" size="50" required><br><br>
+    <h1>YouTube Video Downloader</h1>
+    <form method="POST" action="/">
+        <label for="url">YouTube Video or Playlist URL:</label>
+        <input type="text" id="url" name="url" placeholder="Enter video or playlist URL" required />
 
-        <label>Quality:</label>
-        <select name="quality">
+        <label for="quality">Video Quality (if not audio-only):</label>
+        <select id="quality" name="quality">
             <option>1080p</option>
-            <option>720p</option>
+            <option selected>720p</option>
             <option>480p</option>
-        </select><br><br>
+            <option>360p</option>
+            <option>240p</option>
+            <option>144p</option>
+        </select>
 
-        <label><input type="checkbox" name="audio"> Audio Only (MP3)</label><br><br>
+        <div class="checkbox">
+            <input type="checkbox" id="audio" name="audio" />
+            <label for="audio" style="display:inline; font-weight: normal;">Audio Only (MP3)</label>
+        </div>
 
         <button type="submit">Download</button>
     </form>
-    <p>{{ message }}</p>
+
+    {% if message %}
+    <div class="message">{{ message }}</div>
+    {% endif %}
+
+    <hr />
+    <p style="font-size: small; color: gray;">Created by Suhail Al Mehedi</p>
 </body>
 </html>

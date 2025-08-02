@@ -1,30 +1,32 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file, redirect, url_for
 import yt_dlp
 import os
+import tempfile
 
 app = Flask(__name__)
 
-DOWNLOAD_FOLDER = os.path.join(os.getcwd(), "downloads")
-os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    message = ""
-    if request.method == 'POST':
-        url = request.form.get('url', '').strip()
-        quality = request.form.get('quality', '720p')
-        audio = request.form.get('audio') == 'on'  # checkbox returns 'on' if checked
+    if request.method == "POST":
+        url = request.form.get("url")
+        quality = request.form.get("quality", "720p")
+        audio_only = request.form.get("audio_only") == "on"
+        browser = request.form.get("browser", "chrome")
 
         if not url:
-            message = "❌ Please enter a YouTube video or playlist URL."
-            return render_template('index.html', message=message)
+            return "Please enter a YouTube URL", 400
+
+        # Create temp folder for download
+        temp_dir = tempfile.mkdtemp()
+        outtmpl = os.path.join(temp_dir, "%(title)s.%(ext)s")
 
         ydl_opts = {
-            'outtmpl': os.path.join(DOWNLOAD_FOLDER, '%(title)s.%(ext)s'),
+            'outtmpl': outtmpl,
             'noplaylist': False,
+            'cookiesfrombrowser': (browser,),
         }
 
-        if audio:
+        if audio_only:
             ydl_opts.update({
                 'format': 'bestaudio/best',
                 'postprocessors': [{
@@ -39,15 +41,17 @@ def index():
                 'merge_output_format': 'mp4',
             })
 
-        try:
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                ydl.download([url])
-            message = "✅ Download completed successfully!"
-        except Exception as e:
-            message = f"❌ Error: {str(e)}"
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
 
-    return render_template('index.html', message=message)
+        filename = ydl.prepare_filename(info)
+        # For audio-only postprocessing, change extension to .mp3
+        if audio_only:
+            filename = os.path.splitext(filename)[0] + ".mp3"
 
+        return send_file(filename, as_attachment=True)
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000, debug=True)
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)

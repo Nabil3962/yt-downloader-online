@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for
+from flask import Flask, render_template, request, send_file
 import yt_dlp
 import os
 import tempfile
@@ -16,7 +16,6 @@ def index():
         if not url:
             return "Please enter a YouTube URL", 400
 
-        # Create temp folder for download
         temp_dir = tempfile.mkdtemp()
         outtmpl = os.path.join(temp_dir, "%(title)s.%(ext)s")
 
@@ -45,7 +44,6 @@ def index():
             info = ydl.extract_info(url, download=True)
 
         filename = ydl.prepare_filename(info)
-        # For audio-only postprocessing, change extension to .mp3
         if audio_only:
             filename = os.path.splitext(filename)[0] + ".mp3"
 
@@ -54,4 +52,5 @@ def index():
     return render_template("index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

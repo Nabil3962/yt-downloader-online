@@ -6,30 +6,34 @@ import shutil
 
 app = Flask(__name__)
 
+# Global error handler
+@app.errorhandler(Exception)
+def handle_error(e):
+    return f"System Error: {str(e)}", 500
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
+        url = request.form.get("url")
+        if not url or "youtube.com" not in url and "youtu.be" not in url:
+            return "Invalid YouTube URL", 400
+
+        temp_dir = tempfile.mkdtemp()
         try:
-            url = request.form.get("url")
-            quality = request.form.get("quality", "720")
-            audio_only = request.form.get("audio_only") == "on"
-
-            if not url:
-                return "Please enter a YouTube URL", 400
-
-            temp_dir = tempfile.mkdtemp()
-            outtmpl = os.path.join(temp_dir, "%(title)s.%(ext)s")
-
             ydl_opts = {
-                'outtmpl': outtmpl,
+                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
-                'cookiefile': None,  # Explicitly disable cookies
                 'extract_flat': True,
                 'force_ipv4': True,
+                'cookiefile': None,  # COMPLETELY DISABLES COOKIES
+                'ignoreerrors': True,
+                'nocheckcertificate': True,
+                'default_search': 'auto',
+                'source_address': '0.0.0.0',
             }
 
-            if audio_only:
+            if request.form.get("audio_only"):
                 ydl_opts.update({
                     'format': 'bestaudio/best',
                     'postprocessors': [{
@@ -39,29 +43,26 @@ def index():
                 })
             else:
                 ydl_opts.update({
-                    'format': f'bestvideo[height<={quality}]+bestaudio/best',
+                    'format': f'bestvideo[height<={request.form.get("quality", "720")}]+bestaudio/best',
                     'merge_output_format': 'mp4',
                 })
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=True)
                 filename = ydl.prepare_filename(info)
-                if audio_only:
-                    filename = os.path.splitext(filename)[0] + ".mp3"
+                if request.form.get("audio_only"):
+                    filename = filename.replace('.webm', '.mp3').replace('.mp4', '.mp3')
 
-            response = send_file(filename, as_attachment=True)
-            
-            @response.call_on_close
-            def cleanup():
-                shutil.rmtree(temp_dir, ignore_errors=True)
-                
-            return response
+            return send_file(filename, as_attachment=True)
 
         except Exception as e:
-            return f"Error: {str(e)}", 500
+            shutil.rmtree(temp_dir, ignore_errors=True)
+            return f"Download Error: {str(e)}", 500
+
+        finally:
+            shutil.rmtree(temp_dir, ignore_errors=True)
 
     return render_template("index.html")
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

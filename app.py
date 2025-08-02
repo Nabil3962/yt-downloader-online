@@ -19,7 +19,7 @@ def index():
                 'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
                 'quiet': True,
                 'no_warnings': True,
-                'extract_flat': False,  # FIXES 'NoneType' ERROR
+                'extract_flat': False,
                 'force_ipv4': True,
                 'ignoreerrors': False,
                 'noplaylist': False,

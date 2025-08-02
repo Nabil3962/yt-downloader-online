@@ -1,33 +1,117 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><title>YouTube Downloader</title></head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #333;
+            line-height: 1.5;
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            color: #1a73e8; /* Google blue */
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            color: #1a73e8; /* Google blue */
+            font-weight: bold;
+            margin: 1.5rem 0 1rem 0;
+            font-size: 1.1rem;
+        }
+        
+        .divider {
+            border: none;
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 1.5rem 0;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            font-family: inherit;
+        }
+        
+        .quality-option {
+            margin: 0.75rem 0;
+            font-weight: normal;
+        }
+        
+        .checkbox {
+            margin: 1rem 0;
+        }
+        
+        button {
+            display: block;
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #1a73e8; /* Google blue */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin: 1.5rem auto;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #666;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
 <body>
-    <h1>YouTube Downloader (By Suhail Al Mehedi)</h1>
+    <h1>YouTube Video Downloader</h1>
+    
     <form method="post">
-        <label>Video or Playlist URL:</label><br>
-        <input type="text" name="url" size="50" required><br><br>
-
-        <label>Video Quality:</label><br>
-        <select name="quality">
-            <option>1080p</option>
+        <div class="section-title">YouTube Video or Playlist URL:</div>
+        <input type="text" name="url" placeholder="Enter video or playlist URL" required>
+        
+        <hr class="divider">
+        
+        <div class="section-title">Video Quality (if not audio-only):</div>
+        <select name="quality" class="quality-option">
             <option selected>720p</option>
+            <option>1080p</option>
             <option>480p</option>
             <option>360p</option>
             <option>240p</option>
             <option>144p</option>
-        </select><br><br>
-
-        <input type="checkbox" name="audio_only"> Audio Only (MP3)<br><br>
-
-        <label>Browser for Cookies:</label><br>
+        </select>
+        
+        <div class="checkbox">
+            <input type="checkbox" id="audio_only" name="audio_only">
+            <label for="audio_only">Audio Only (MP3)</label>
+        </div>
+        
+        <hr class="divider">
+        
+        <div class="section-title">Browser for Cookies:</div>
         <select name="browser">
             <option selected>chrome</option>
             <option>firefox</option>
             <option>edge</option>
             <option>brave</option>
-        </select><br><br>
-
+        </select>
+        
         <button type="submit">Download</button>
     </form>
+    
+    <div class="footer">Created by Suhail Al Mehedi</div>
 </body>
 </html>

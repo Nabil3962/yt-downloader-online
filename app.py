@@ -11,7 +11,7 @@ def index():
     if request.method == "POST":
         try:
             url = request.form.get("url")
-            quality = request.form.get("quality", "720p")
+            quality = request.form.get("quality", "720")
             audio_only = request.form.get("audio_only") == "on"
 
             if not url:
@@ -22,10 +22,11 @@ def index():
 
             ydl_opts = {
                 'outtmpl': outtmpl,
-                'noplaylist': False,
-                # Removed cookiesfrombrowser as it doesn't work on servers
                 'quiet': True,
                 'no_warnings': True,
+                'cookiefile': None,  # Explicitly disable cookies
+                'extract_flat': True,
+                'force_ipv4': True,
             }
 
             if audio_only:
@@ -34,12 +35,11 @@ def index():
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
-                        'preferredquality': '192',
                     }],
                 })
             else:
                 ydl_opts.update({
-                    'format': f'bestvideo[height<={quality[:-1]}]+bestaudio/best',
+                    'format': f'bestvideo[height<={quality}]+bestaudio/best',
                     'merge_output_format': 'mp4',
                 })
 
@@ -51,7 +51,6 @@ def index():
 
             response = send_file(filename, as_attachment=True)
             
-            # Clean up temp files after sending
             @response.call_on_close
             def cleanup():
                 shutil.rmtree(temp_dir, ignore_errors=True)
@@ -59,10 +58,10 @@ def index():
             return response
 
         except Exception as e:
-            return f"Error downloading video: {str(e)}", 500
+            return f"Error: {str(e)}", 500
 
     return render_template("index.html")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(host="0.0.0.0", port=port)

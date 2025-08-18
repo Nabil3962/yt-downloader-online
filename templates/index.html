@@ -66,14 +66,24 @@
     <form method="post">
         <div class="section">
             <div class="section-title">YouTube Video or Playlist URL:</div>
-            <input type="text" name="url" placeholder="Enter video or playlist URL" required>
+            <input type="text" name="url" placeholder="Enter video or playlist URL" required value="{{ url if url }}">
         </div>
         
         <hr>
         
         <div class="section">
             <div class="section-title">Video Quality (if not audio-only):</div>
-            <div class="quality-option">720p</div>
+            {% if formats %}
+                {% for f in formats %}
+                    <label class="quality-option">
+                        <input type="radio" name="format_id" value="{{ f.format_id }}">
+                        {{ f.resolution }} ({{ f.ext }}, {{ f.filesize }})
+                    </label><br>
+                {% endfor %}
+            {% else %}
+                <div class="quality-option">Default: 720p</div>
+            {% endif %}
+            
             <label>
                 <input type="checkbox" name="audio_only"> Audio Only (MP3)
             </label>

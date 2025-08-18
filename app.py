@@ -15,6 +15,7 @@ def index():
         if not url:
             return "Please enter a YouTube URL", 400
 
+        # Step 1: If no format chosen, show available formats
         if not chosen_format and not audio_only:
             with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
                 info_dict = ydl.extract_info(url, download=False)
@@ -31,6 +32,7 @@ def index():
                         })
             return render_template("index.html", url=url, formats=formats)
 
+        # Step 2: Download the chosen format or audio
         else:
             temp_dir = tempfile.mkdtemp()
             try:
@@ -67,4 +69,6 @@ def index():
 
 if __name__ == "__main__":
     # For local testing only
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    debug_mode = False if os.environ.get("PORT") else True
+    app.run(host="0.0.0.0", port=port, debug=debug_mode)

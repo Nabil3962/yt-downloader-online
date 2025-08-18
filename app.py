@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, send_file
 import yt_dlp
 import os
 import tempfile
-import shutil
 
 app = Flask(__name__)
 
@@ -10,47 +9,67 @@ app = Flask(__name__)
 def index():
     if request.method == "POST":
         url = request.form.get("url")
+        chosen_format = request.form.get("format_id")
+        audio_only = request.form.get("audio_only")
+
         if not url:
             return "Please enter a YouTube URL", 400
 
-        temp_dir = tempfile.mkdtemp()
-        try:
-            ydl_opts = {
-                'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
-                'quiet': True,
-                'no_warnings': True,
-                'extract_flat': False,
-                'force_ipv4': True,
-                'ignoreerrors': False,
-                'noplaylist': False,
-            }
+        if not chosen_format and not audio_only:
+            # Step 1: Fetch available formats (no download yet)
+            with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
+                info_dict = ydl.extract_info(url, download=False)
+                formats = []
+                for f in info_dict.get("formats", []):
+                    if f.get("vcodec") != "none" and f.get("acodec") != "none":
+                        size = f.get("filesize")
+                        if size:
+                            size_mb = round(size / (1024 * 1024), 1)
+                            size_str = f"{size_mb} MB"
+                        else:
+                            size_str = "Unknown size"
+                        formats.append({
+                            "format_id": f["format_id"],
+                            "ext": f["ext"],
+                            "resolution": f.get("format_note") or f.get("height", "N/A"),
+                            "filesize": size_str
+                        })
+            return render_template("index.html", url=url, formats=formats)
 
-            if request.form.get("audio_only"):
-                ydl_opts.update({
-                    'format': 'bestaudio/best',
-                    'postprocessors': [{
-                        'key': 'FFmpegExtractAudio',
-                        'preferredcodec': 'mp3',
-                    }],
-                })
-            else:
-                ydl_opts.update({
-                    'format': 'bestvideo[height<=720]+bestaudio/best',
-                    'merge_output_format': 'mp4',
-                })
+        else:
+            # Step 2: Actual download
+            temp_dir = tempfile.mkdtemp()
+            try:
+                ydl_opts = {
+                    'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
+                    'quiet': True,
+                    'no_warnings': True,
+                }
 
-            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info_dict = ydl.extract_info(url, download=True)
-                filename = ydl.prepare_filename(info_dict)
+                if audio_only:
+                    ydl_opts.update({
+                        'format': 'bestaudio/best',
+                        'postprocessors': [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'mp3',
+                        }],
+                    })
+                else:
+                    ydl_opts['format'] = chosen_format
 
-            return send_file(filename, as_attachment=True)
+                with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(url, download=True)
+                    filename = ydl.prepare_filename(info_dict)
+                    if audio_only:
+                        filename = os.path.splitext(filename)[0] + ".mp3"
 
-        except Exception as e:
-            return f"Download Error: {str(e)}", 500
-        finally:
-            shutil.rmtree(temp_dir, ignore_errors=True)
+                return send_file(filename, as_attachment=True)
 
-    return render_template("index.html")
+            except Exception as e:
+                return f"Download Error: {str(e)}", 500
+
+    return render_template("index.html", formats=None)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

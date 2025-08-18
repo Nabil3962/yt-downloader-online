@@ -16,18 +16,13 @@ def index():
             return "Please enter a YouTube URL", 400
 
         if not chosen_format and not audio_only:
-            # Step 1: Fetch available formats (no download yet)
             with yt_dlp.YoutubeDL({'quiet': True, 'no_warnings': True}) as ydl:
                 info_dict = ydl.extract_info(url, download=False)
                 formats = []
                 for f in info_dict.get("formats", []):
                     if f.get("vcodec") != "none" and f.get("acodec") != "none":
                         size = f.get("filesize")
-                        if size:
-                            size_mb = round(size / (1024 * 1024), 1)
-                            size_str = f"{size_mb} MB"
-                        else:
-                            size_str = "Unknown size"
+                        size_str = f"{round(size/(1024*1024),1)} MB" if size else "Unknown size"
                         formats.append({
                             "format_id": f["format_id"],
                             "ext": f["ext"],
@@ -37,7 +32,6 @@ def index():
             return render_template("index.html", url=url, formats=formats)
 
         else:
-            # Step 2: Actual download
             temp_dir = tempfile.mkdtemp()
             try:
                 ydl_opts = {
@@ -55,7 +49,7 @@ def index():
                         }],
                     })
                 else:
-                    ydl_opts['format'] = chosen_format
+                    ydl_opts['format'] = chosen_format or 'bestvideo[height<=720]+bestaudio/best'
 
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info_dict = ydl.extract_info(url, download=True)
@@ -72,4 +66,5 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # For local testing only
+    app.run(host="0.0.0.0", port=5000, debug=True)
